@@ -1,9 +1,12 @@
 from http import HTTPStatus
+from typing import Any, Literal
+from rest_framework.test import APIClient
+
 
 from django.db.utils import IntegrityError
 import pytest
 
-from posts.models import Comment
+from posts.models import Comment, Post
 
 
 @pytest.mark.django_db(transaction=True)
@@ -39,7 +42,7 @@ class TestCommentAPI:
                 '`id` комментария.'
             )
 
-    def test_comments_not_authenticated(self, client, post):
+    def test_comments_not_authenticated(self, client: Any, post: Post):
         response = client.get(
             self.comments_url.format(post_id=post.id)
         )
@@ -48,8 +51,8 @@ class TestCommentAPI:
             f'`{self.comments_url}` возвращает ответ со статусом 200.'
         )
 
-    def test_comment_single_not_authenticated(self, client, post,
-                                              comment_1_post):
+    def test_comment_single_not_authenticated(self, client: Any, post: Post,
+                                              comment_1_post: Comment):
         response = client.get(
             self.comment_detail_url.format(
                 post_id=post.id, comment_id=comment_1_post.id
@@ -60,7 +63,7 @@ class TestCommentAPI:
             f'`{self.comment_detail_url}` возвращает ответ со статусом 200.'
         )
 
-    def test_comments_not_found(self, user_client, post):
+    def test_comments_not_found(self, user_client: APIClient, post: Post):
         response = user_client.get(
             self.comments_url.format(post_id=post.id)
         )
@@ -69,7 +72,7 @@ class TestCommentAPI:
             '*urls.py*.'
         )
 
-    def test_comments_id_available(self, user_client, post, comment_1_post):
+    def test_comments_id_available(self, user_client: APIClient, post: Post, comment_1_post: Comment):
         response = user_client.get(
             self.comment_detail_url.format(
                 post_id=post.id, comment_id=comment_1_post.id
@@ -80,8 +83,8 @@ class TestCommentAPI:
             'настройки в *urls.py*.'
         )
 
-    def test_comments_get(self, user_client, post, comment_1_post,
-                          comment_2_post, comment_1_another_post):
+    def test_comments_get(self, user_client: APIClient, post: Post, comment_1_post: Comment,
+                          comment_2_post: Comment, comment_1_another_post: Comment):
         response = user_client.get(
             self.comments_url.format(post_id=post.id)
         )
@@ -108,7 +111,8 @@ class TestCommentAPI:
             db_comment=comment
         )
 
-    def test_comment_create_by_unauth(self, client, post, comment_1_post):
+    def test_comment_create_by_unauth(self, client: Any, post: Post,
+                                      comment_1_post: Comment):
         comment_cnt = Comment.objects.count()
 
         assert_msg = (
@@ -135,8 +139,9 @@ class TestCommentAPI:
             'комментарий.'
         )
 
-    def test_comments_post_auth_with_valid_data(self, user_client, post,
-                                                user, another_user):
+    def test_comments_post_auth_with_valid_data(self, user_client: APIClient,
+                                                post: Post,
+                                                user: Any, another_user: Any):
         comments_count = Comment.objects.count()
 
         assert_msg = (
@@ -184,7 +189,7 @@ class TestCommentAPI:
             f'`{self.comments_url}` создаёт новый комментарий.'
         )
 
-    def test_comments_auth_post_with_invalid_data(self, user_client, post):
+    def test_comments_auth_post_with_invalid_data(self, user_client: APIClient, post: Post):
         comments_count = Comment.objects.count()
 
         response = user_client.post(
@@ -201,7 +206,7 @@ class TestCommentAPI:
             f'`{self.comments_url}` новый комментарий не создаётся.'
         )
 
-    def test_comment_author_and_post_are_read_only(self, user_client, post):
+    def test_comment_author_and_post_are_read_only(self, user_client: APIClient, post: Post):
         response = user_client.post(
             self.comments_url.format(post_id=post.id),
             data={}
@@ -217,8 +222,8 @@ class TestCommentAPI:
             '`author` и `post` установлен свойство "Только для чтения".'
         )
 
-    def test_comment_id_auth_get(self, user_client, post,
-                                 comment_1_post, user):
+    def test_comment_id_auth_get(self, user_client: APIClient, post: Post,
+                                 comment_1_post: Comment, user: Any):
         response = user_client.get(
             self.comment_detail_url.format(
                 post_id=post.id, comment_id=comment_1_post.id
@@ -248,11 +253,11 @@ class TestCommentAPI:
 
     @pytest.mark.parametrize('http_method', ('put', 'patch'))
     def test_comment_change_by_auth_with_valid_data(self,
-                                                    user_client,
-                                                    post,
-                                                    comment_1_post,
-                                                    comment_2_post,
-                                                    http_method):
+                                                    user_client: APIClient,
+                                                    post: Post,
+                                                    comment_1_post: Comment,
+                                                    comment_2_post: Comment,
+                                                    http_method: Literal['put', 'patch']):
         request_func = getattr(user_client, http_method)
         response = request_func(
             self.comment_detail_url.format(
@@ -292,10 +297,10 @@ class TestCommentAPI:
 
     @pytest.mark.parametrize('http_method', ('put', 'patch'))
     def test_comment_change_not_auth_with_valid_data(self,
-                                                     client,
-                                                     post,
-                                                     comment_1_post,
-                                                     http_method):
+                                                     client: Any,
+                                                     post: Post,
+                                                     comment_1_post: Comment,
+                                                     http_method: Literal['put', 'patch']):
         request_func = getattr(client, http_method)
         response = request_func(
             self.comment_detail_url.format(
@@ -316,8 +321,8 @@ class TestCommentAPI:
             'комментарий.'
         )
 
-    def test_comment_delete_by_author(self, user_client,
-                                      post, comment_1_post):
+    def test_comment_delete_by_author(self, user_client: APIClient,
+                                      post: Post, comment_1_post: Comment):
         response = user_client.delete(
             self.comment_detail_url.format(
                 post_id=post.id, comment_id=comment_1_post.id
@@ -335,8 +340,8 @@ class TestCommentAPI:
             f'`{self.comment_detail_url}` удаляет комментарий.'
         )
 
-    def test_comment_delete_by_not_author(self, user_client,
-                                          post, comment_2_post):
+    def test_comment_delete_by_not_author(self, user_client: APIClient,
+                                          post: Post, comment_2_post: Comment):
         response = user_client.delete(
             self.comment_detail_url.format(
                 post_id=post.id, comment_id=comment_2_post.id
@@ -354,7 +359,7 @@ class TestCommentAPI:
             'удаляет этот комментарий.'
         )
 
-    def test_comment_delete_by_unauth(self, client, post, comment_1_post):
+    def test_comment_delete_by_unauth(self, client: Any, post: Post, comment_1_post: Comment):
         response = client.delete(
             self.comment_detail_url.format(
                 post_id=post.id, comment_id=comment_1_post.id
