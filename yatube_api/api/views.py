@@ -2,8 +2,8 @@ from rest_framework import filters, viewsets, permissions, mixins
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
 
-from .permissions import IsAuthorOrReadOnly
-from .serializers import (
+from api.permissions import IsAuthorOrReadOnly
+from api.serializers import (
     CommentSerializer,
     FollowSerializer,
     GroupSerializer,
@@ -25,7 +25,6 @@ class PostViewSet(viewsets.ModelViewSet):
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = (IsAuthorOrReadOnly,)
 
 
 class CommentViewSet(viewsets.ModelViewSet):

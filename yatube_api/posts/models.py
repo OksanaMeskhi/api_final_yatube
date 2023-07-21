@@ -26,7 +26,10 @@ class Post(models.Model):
     )
 
     def __str__(self):
-        return self.text
+        return self.text(max_length=200)
+
+    class Meta:
+        ordering = ['text', 'pub_date', 'author']
 
 
 class Comment(models.Model):
