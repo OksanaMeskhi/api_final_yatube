@@ -24,7 +24,8 @@ source venv/scripts/activate`
 
 Установить зависимости из файла requirements.txt:
 
-`pip install -r requirements.txt`
+pip install -r requirements.txt
+Установить Djoser
 
 Выполнить миграции:
 
